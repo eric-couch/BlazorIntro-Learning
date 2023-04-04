@@ -1,0 +1,89 @@
+﻿@*<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">BlazorIntro</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>*@
+
+@*<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="search">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Search
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="users">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> User Admin
+                </NavLink>
+            </div>
+        </AuthorizeView>
+    </nav>
+</div>*@
+
+<nav class="nav nav-masthead justify-content-center float-md-end">
+    <NavLink class="nav-link  fw-bold py-1 px-0 active" href="" Match="NavLinkMatch.All">
+        Home
+    </NavLink>
+    <AuthorizeView>
+            <Authorized>
+            <NavLink class="nav-link fw-bold py-1 px-0" href="search">
+                    Search
+                </NavLink>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Admin">
+            <NavLink class="nav-link fw-bold py-1 px-0" href="users">
+                User Admin
+            </NavLink>
+        </AuthorizeView>
+</nav>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    [Inject]
+    private AuthenticationStateProvider? authenticationStateProvider { get; set; }
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private bool IsAuthenticated { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //if (authenticationState is not null)
+        //{
+        //    var authState = await authenticationState;
+        //    var user = authState?.User;
+        //    //IsAuthenticated = user.Identity.IsAuthenticated;
+        //    IsAuthenticated = authState.User.Identity.IsAuthenticated;
+        //}
+        
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        if (user.Identity is not null && user.Identity.IsAuthenticated)
+        {
+            IsAuthenticated = true;
+        }
+        
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

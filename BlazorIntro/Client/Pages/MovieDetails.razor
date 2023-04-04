@@ -1,0 +1,21 @@
+﻿@if (Movie is not null)
+{
+    <div class="card">
+        <img src="@Movie.Poster" class="card-img-top" alt="@Movie.Title" />
+        <div class="card-body">
+            <h5>@Movie.Title (@Movie.Year)</h5>
+            @*<p class="card-text">@Movie.Plot</p>*@
+            @if (Movie?.Ratings is not null) {
+                <h6>Ratings</h6>
+                <ul class="list-group list-group-flush">
+                @foreach (var rating in Movie.Ratings)
+                {
+                    <li class="list-group-item">@rating.Source: @rating.Value</li>
+                }
+                </ul>
+            }
+            <a href="https://www.imdb.com/title/@Movie.imdbID" target="_blank" class="btn btn-primary">IMDB</a>
+            <button class="btn btn-primary" @onclick="@(() => RemoveFavoriteMovie(@Movie))">Remove</button>
+        </div>
+    </div>
+}
