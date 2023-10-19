@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using BlazorIntro.Server.Factory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,8 @@ builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(options =>
     {
         options.IdentityResources["openid"].UserClaims.Add("role");
+        options.IdentityResources["openid"].UserClaims.Add("firstname");
+        options.IdentityResources["openid"].UserClaims.Add("lastname");
         options.ApiResources.Single().UserClaims.Add("role");
     });
 
@@ -33,6 +36,8 @@ builder.Services.AddAuthentication(options => {
     options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme; 
     options.DefaultSignInScheme = IdentityConstants.ExternalScheme; })
     .AddIdentityServerJwt();
+
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomClaimsFactory>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
