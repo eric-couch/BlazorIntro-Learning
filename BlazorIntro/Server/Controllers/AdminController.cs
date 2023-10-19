@@ -11,61 +11,32 @@ namespace BlazorIntro.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize(Roles ="Admin")]
 public class AdminController : Controller
 {
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly RoleManager<IdentityRole> roleManager;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ApplicationDbContext _context;
 
-    public AdminController( UserManager<ApplicationUser> _userManager,
-                            RoleManager<IdentityRole> _roleManager,
+    public AdminController( UserManager<ApplicationUser> userManager,
+                            RoleManager<IdentityRole> roleManager,
                             ApplicationDbContext context)
     {
-        userManager = _userManager;
-        roleManager = _roleManager;
+        _userManager = userManager;
+        _roleManager = roleManager;
         _context = context;
     }
 
     [HttpGet]
-    public async Task<List<UserDto>> Get()
+    public async Task<List<UserRolesDto>> Get()
     {
-        var users = await _context.Users
-                    .Include(m => m.FavoriteMovies)
-                    .Select(u => new UserDto
-                    {
-                        Id = u.Id,
-                        UserName = u.UserName,
-                        FirstName = u.FirstName,
-                        LastName = u.LastName,
-                        FavoriteMovies = u.FavoriteMovies
-                    }).ToListAsync();
-        //var users = await (from u in _context.Users
-        //                   join ur in _context.UserRoles on u.Id equals ur.UserId
-        //                   join r in _context.Roles on ur.RoleId equals r.Id
-        //                   select new UserDto
-        //                   {
-        //                       Id = u.Id,
-        //                       UserName = u.UserName,
-        //                       FirstName = u.FirstName,
-        //                       LastName = u.LastName,
-        //                       r
-        //                   }).Include(m => m.FavoriteMovies)
-        //                   .ToListAsync();
-
-        foreach (var user in users)
+        var users = _userManager.Users.Select(u => new UserRolesDto()
         {
-            var iUser = await userManager.FindByIdAsync(user.Id);
-            var roles = await userManager.GetRolesAsync(iUser);
-            foreach (var role in roles)
-            {
-                IdentityRole? iRole = await roleManager.FindByNameAsync(role);
-                if (iRole is not null)
-                {
-                    user.Roles.Add(iRole);
-                }
-            }
-        }
+            Id = u.Id,
+            UserName = u.UserName,
+            Email = u.Email,
+            Roles = _userManager.GetRolesAsync(u).Result.ToArray()
+        }).ToList();
+
 
         return users;
     }
